@@ -132,3 +132,12 @@ def dispatch(controller_class, models_module, params):
         params_list.append(obj)
     method_reference = getattr(controller, controller_method)
     return method_reference(*params_list)
+
+
+def response(obj):
+    """
+    Format the response compatible with remotipy
+    :param obj:
+    :return:
+    """
+    return json.dumps(obj,  default=__object_serializer)

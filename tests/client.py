@@ -17,4 +17,4 @@ if __name__ == '__main__':
                     'email': "my@email.me"
                     })
     # Call remote
-    print DAO().add_user(user)
+    print DAO().add_user(user).message

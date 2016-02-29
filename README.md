@@ -56,12 +56,15 @@ class DAO(object):
 Dispatch the body of the request to the invoked method. Here you can make the security checks (i.e. http headers).
 
 ```python
-@app.route('/query', methods=['POST'])
+@app.route('/method_dispatcher', methods=['POST'])
 def query():
+    # check http header, cookies, etc
     # dispatch format: controller_class, models_module, raw_body 
-    result = rpc.dispatch(DAO, data.models, request.get_data())
-    return json.dumps(result)
+    result = rpc.dispatch(DAO, models, request.get_data())
+    return response(result)
 ```
+
+Note: the function *response* is required to serialize back the response
 
 ### Step 5: Enjoy
 
