@@ -20,8 +20,11 @@ def __remote_call(endpoint, models, extras, method, *params):
     req = {'method': method, 'params': method_params}
     logging.debug("REQUEST GET: " + endpoint)
     logging.debug("BODY: " + str(req))
+    headers = {}
+    if 'headers' in extras:
+        headers = extras['headers']
     request = urllib2.Request(endpoint,
-                              headers=extras,
+                              headers=headers,
                               data=json.dumps(req, default=__object_serializer))
     content = urllib2.urlopen(request).read()
     logging.debug("RAW RESPONSE: " + str(content))

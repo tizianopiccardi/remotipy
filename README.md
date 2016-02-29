@@ -33,7 +33,7 @@ class DAO(object):
 
 Note: *@remote* supports custom HTTP headers using this format:
 ```python
-@remote("http://localhost:5000/method_dispatcher", data.models, header={
+@remote("http://localhost:5000/method_dispatcher", data.models, headers={
             'X-Authentication-token': TokenGenerator.generate({'key': 123456789})
           })
 ```
