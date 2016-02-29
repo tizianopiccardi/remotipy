@@ -53,7 +53,7 @@ class DAO(object):
 
 ### Step 4: Define the rest endpoint (Server)
 
-Dispatch the body of the request to the invoked method. Here you can make the security checks (i.e. http headers).
+You can use any python rest server to dispatch the body of the request to the invoked method. In this example we are using the Flask format.
 
 ```python
 @app.route('/method_dispatcher', methods=['POST'])
