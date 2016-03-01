@@ -48,7 +48,7 @@ def __object_deserializer(models_module, obj):
     :param obj:
     :return:
     """
-    if '_class' not in obj:
+    if obj is None or '_class' not in obj:
         return obj
     else:
         cls = getattr(models_module, obj['_class'])
@@ -67,13 +67,12 @@ def __query_decorator(func):
     """
     def run_query(*v):
         logging.info(v[0].__rpc_endpoint__)
-        response = __remote_call(v[0].__rpc_endpoint__,
+        response_object = __remote_call(v[0].__rpc_endpoint__,
                                   v[0].__models_module__,
                                   v[0].__rpc_extras__,
                                   func.__name__, *v)
-        #v[0].response = response
         #return func(*v)
-        return response
+        return response_object
     return run_query
 
 
