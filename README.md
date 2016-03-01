@@ -1,13 +1,13 @@
 # remotipy
 Remote RPC over HTTP for python (v0.1)
 
-### Step 1: Define the models (Client & Server)
+### Step 1: Define the DTO (Client & Server)
 
-In module *data.models* describe the models:
+In module *data.dto* (example) describe the transfer objects (DTO):
 
 ```python
-@model
-class UserModel(object):
+@serializable
+class UserInfo(object):
     def __init__(self, params, login_provider=None):
         self.id = params.get('id')
         self.first_name = params.get('first_name')
@@ -25,7 +25,7 @@ Use the decorator *@remote* to specify the rest endpoint and the module containi
 from data import models
 
 @remote("http://localhost:5000/method_dispatcher", models)
-class DAO(object):
+class RemoteDAO(object):
 
     def add_user(self, user):
         pass
