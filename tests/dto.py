@@ -1,7 +1,7 @@
-from remotipy.rpc import model
+from remotipy.rpc import serializable
 
 
-@model
+@serializable
 class UserModel(object):
     def __init__(self, params, login_provider=None):
         self.id = params.get('id')
@@ -10,7 +10,7 @@ class UserModel(object):
         self.email = params.get('email')
 
 
-@model
+@serializable
 class Result(object):
     def __init__(self, params):
         self.status = params.get('status')

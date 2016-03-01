@@ -99,7 +99,7 @@ def __serialize_object__(obj):
     return json.dumps(obj, default=__object_serializer)
 
 
-def model(original_class):
+def serializable(original_class):
     """
     Decorator used to declare a serializable model (class level)
     :param original_class:

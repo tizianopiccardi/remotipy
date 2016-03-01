@@ -2,9 +2,9 @@ import json
 
 from flask import Flask, request
 from remotipy import rpc
-from remotipy.rpc import __object_serializer, response
-from tests import models
-from tests.models import Result
+from remotipy.rpc import response
+from tests import dto
+from tests.dto import Result
 
 
 class DAO(object):
@@ -20,7 +20,7 @@ app = Flask(__name__)
 @app.route('/method_dispatcher', methods=['POST'])
 def query():
     # check http header, cookies, etc
-    result = rpc.dispatch(DAO, models, request.get_data())
+    result = rpc.dispatch(DAO, dto, request.get_data())
     return response(result)
 
 

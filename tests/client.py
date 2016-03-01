@@ -1,10 +1,10 @@
-from tests import models
+from tests import dto
 from remotipy.rpc import remote
-from tests.models import UserModel
+from tests.dto import UserModel
 
 
-@remote("http://localhost:5000/method_dispatcher", models)
-class DAO(object):
+@remote("http://localhost:5000/method_dispatcher", dto)
+class RemoteDAO(object):
 
     def add_user(self, user):
         pass
@@ -17,4 +17,4 @@ if __name__ == '__main__':
                     'email': "my@email.me"
                     })
     # Call remote
-    print DAO().add_user(user).message
+    print RemoteDAO().add_user(user).message
