@@ -41,6 +41,13 @@ def __object_serializer(o):
         return {'_class': o.__class__.__name__, '_data': o.__dict__}
 
 
+primitive = (int, str, bool, float)
+
+
+def is_primitive(thing):
+    return isinstance(thing, primitive)
+
+
 def __object_deserializer(models_module, obj):
     """
     Private method: Json deserializer
@@ -48,7 +55,7 @@ def __object_deserializer(models_module, obj):
     :param obj:
     :return:
     """
-    if obj is None or '_class' not in obj:
+    if obj is None or is_primitive(obj) or '_class' not in obj:
         return obj
     else:
         cls = getattr(models_module, obj['_class'])
