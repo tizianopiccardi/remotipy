@@ -1,6 +1,9 @@
 import json
 import logging
-import urllib2
+import urllib3
+
+
+http = urllib3.PoolManager(10)
 
 
 def __remote_call(endpoint, models, extras, method, *params):
@@ -23,11 +26,13 @@ def __remote_call(endpoint, models, extras, method, *params):
     headers = {}
     if 'headers' in extras:
         headers = extras['headers']
-    request = urllib2.Request(endpoint,
-                              headers=headers,
-                              data=json.dumps(req, default=__object_serializer))
-    content = urllib2.urlopen(request).read()
-    logging.debug("RAW RESPONSE: " + str(content))
+
+    r = http.request('POST', endpoint,
+                     headers=headers,
+                     body=json.dumps(req, default=__object_serializer))
+    content = r.data
+
+    # print("RAW RESPONSE: " + str(content))
     return json.loads(content, object_hook=lambda x: __object_deserializer(models, x))
 
 
@@ -74,10 +79,11 @@ def __query_decorator(func):
     """
     def run_query(*v):
         logging.info(v[0].__rpc_endpoint__)
-        response_object = __remote_call(v[0].__rpc_endpoint__,
-                                  v[0].__models_module__,
-                                  v[0].__rpc_extras__,
-                                  func.__name__, *v)
+        response_object = __remote_call(
+                                v[0].__rpc_endpoint__,
+                                v[0].__models_module__,
+                                v[0].__rpc_extras__,
+                                func.__name__, *v)
         #return func(*v)
         return response_object
     return run_query
