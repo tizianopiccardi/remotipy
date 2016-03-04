@@ -1,5 +1,3 @@
-import json
-
 from flask import Flask, request
 from remotipy import rpc
 from remotipy.rpc import response
@@ -11,7 +9,7 @@ class DAO(object):
 
     def add_user(self, user):
         # all your logic here
-        return Result({'status': 1, 'message': 'DONE!'})
+        return Result({'status': 1, 'message': user.email+' DONE!'})
 
 ##########################################
 app = Flask(__name__)

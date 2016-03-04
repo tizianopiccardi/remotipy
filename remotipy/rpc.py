@@ -1,7 +1,7 @@
 import json
 import logging
 import urllib3
-
+import sys
 
 http = urllib3.PoolManager(10)
 
@@ -43,9 +43,12 @@ def __object_serializer(o):
     :return:
     """
     if isinstance(o, object) and hasattr(o, '__serializable__'):
-        return {'_class': o.__class__.__name__, '_data': o.__dict__}
+        result = {'_class': o.__class__.__name__, '_data': o.__dict__}
+        if isinstance(o, SerializableException):
+            result['exception'] = True
+        return result
 
-
+# types that do not need complex in json (and not iterable)
 primitive = (int, str, bool, float)
 
 
@@ -63,11 +66,20 @@ def __object_deserializer(models_module, obj):
     if obj is None or is_primitive(obj) or '_class' not in obj:
         return obj
     else:
+
+        # if it's an exception the DTO is in this module (should be possible only on client side)
+        if obj['_class'] == 'SerializableException' and obj['exception']:
+            models_module = sys.modules[__name__]
+
+        # get the class reference
         cls = getattr(models_module, obj['_class'])
-        result = cls(obj['_data'])
+        # instantiate the object
+        result = cls()
+        # fill the object
         for k, v in obj['_data'].iteritems():
             if isinstance(v, object):
                 setattr(result, k, v)
+
         return result
 
 
@@ -85,7 +97,10 @@ def __query_decorator(func):
                                 v[0].__rpc_extras__,
                                 func.__name__, *v)
         #return func(*v)
-        return response_object
+        if isinstance(response_object, SerializableException):
+            raise RemoteException(response_object.message, response_object.cls)
+        else:
+            return response_object
     return run_query
 
 
@@ -122,7 +137,6 @@ def serializable(original_class):
 
     def __init__(self, *args, **kws):
         setattr(original_class, "__serializable__", classmethod(lambda: True))
-        setattr(original_class, "response", classmethod(__serialize_object__))
         orig_init(self, *args, **kws)
 
     original_class.__init__ = __init__
@@ -145,8 +159,21 @@ def dispatch(controller_class, models_module, params):
     for i in params_list_dict:
         obj = __object_deserializer(models_module, i)
         params_list.append(obj)
-    method_reference = getattr(controller, controller_method)
-    return method_reference(*params_list)
+
+    try:
+
+        if not hasattr(controller, controller_method):
+            raise MethodNotFound(controller_method)
+
+        method_reference = getattr(controller, controller_method)
+        return method_reference(*params_list)
+
+    except Exception as e:
+        logging.error('Exception ' + e.__class__.__name__ +
+                      ' managed in method ' + controller_method +
+                      ": " + e.message)
+        return SerializableException({'cls': e.__class__.__name__,
+                                      'message': e.message})
 
 
 def response(obj):
@@ -156,3 +183,34 @@ def response(obj):
     :return:
     """
     return json.dumps(obj,  default=__object_serializer)
+
+
+@serializable
+class SerializableException(object):
+    """
+    Exception DTO
+    """
+    def __init__(self, info={}):
+        self.cls = info.get('cls')
+        self.message = info.get('message')
+
+
+class MethodNotFound(Exception):
+    """
+    Raised when the requested method is not present in the remote controller (SERVER SIDE)
+    """
+    pass
+
+
+class RemoteException(Exception):
+    """
+    Raised on the client side if we had an exception on the server
+    """
+    def __init__(self, message, cls):
+
+        # Call the base class constructor with the parameters it needs
+        super(RemoteException, self).__init__(message)
+        self.cls = cls
+
+    def __str__(self):
+        return self.cls + ": " + self.message

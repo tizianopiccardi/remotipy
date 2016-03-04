@@ -1,5 +1,5 @@
 # remotipy
-Remote RPC over HTTP for python (v0.1)
+Remote RPC over HTTP for python (v0.1.2) - Remote exception support
 
 ### Step 1: Define the DTO (Client & Server)
 
@@ -8,7 +8,7 @@ In module *data.dto* (example) describe the transfer objects (DTO):
 ```python
 @serializable
 class UserInfo(object):
-    def __init__(self, params, login_provider=None):
+    def __init__(self, params={}, login_provider=None):
         self.id = params.get('id')
         self.first_name = params.get('first_name')
         self.last_name = params.get('last_name')
@@ -72,3 +72,13 @@ On the client now you can call:
 ```python
 result = DAO().add_user(user)
 ```
+
+--------
+
+#### Known limitations:
+
+The constructor ```def __init__(self, [ params={}, ... ] ) ``` of the serializable objects (step 1) **MUST** support the empty call.
+
+#### FAQ: 
+1. **How can I handle a remote exception?**
+    Remote exception are raised on the client side with type ```remotipy.rpc.RemoteException``` and you have access to the original message (```.message```) and the original class name (```.cls```)
