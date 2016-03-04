@@ -84,7 +84,9 @@ The constructor ```def __init__(self, [ params={}, ... ] ) ``` of the serializab
 
 #### FAQ: 
 1. **How can I handle a remote exception?**
-    Remote exception are raised on the client side with type ```remotipy.rpc.RemoteException``` and you have access to the original message (```.message```) and the original class name (```.cls```)
-1. **I get ```MethodNotFound: <my_remote_method>```**. Why?
-    Check the interface on the client side and the implementation on the server side have the same methods signatures: steps 2/3. 
-    (You could even copy same file on the client because the methods body is ignored)
+Remote exception are raised on the client side with type ```remotipy.rpc.RemoteException``` and you have access to the original message (```.message```) and the original class name (```.cls```)
+2. **I get ```MethodNotFound: <my_remote_method>```. Why?**
+Check the interface on the client side and the implementation on the server side have the same methods signatures: steps 2/3. 
+(You could even copy same file on the client because the methods body is ignored)
+3. **I'm using App Engine and I get ```TypeError('expected httplib.Message)```. Why?**
+This is a known issue of urllib3&Python 2.7, to fix this go in ```<lib_dir_>/urllib3/util/response.py``` and remove from line 47 to 49.
