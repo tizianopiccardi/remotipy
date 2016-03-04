@@ -8,11 +8,15 @@ In module *data.dto* (example) describe the transfer objects (DTO):
 ```python
 @serializable
 class UserInfo(object):
-    def __init__(self, params={}, login_provider=None):
-        self.id = params.get('id')
+    def __init__(self, params={}):
         self.first_name = params.get('first_name')
         self.last_name = params.get('last_name')
         self.email = params.get('email')
+        
+@serializable
+class Result(object):
+    def __init__(self, msg = None):
+        self.message = msg
 ```
 
 Note: share this file both on the client and the server
@@ -27,7 +31,7 @@ from data import models
 @remote("http://localhost:5000/method_dispatcher", models)
 class RemoteDAO(object):
 
-    def add_user(self, user):
+    def my_remote_method(self, user):
         pass
 ```
 
@@ -45,10 +49,9 @@ Implement the actual logic
 ```python
 class DAO(object):
 
-    def add_user(self, user):
+    def my_remote_method(self, user):
         # all your logic here
-        result_object = UserDB.insert_one(user_document).id
-        return result_object
+        return Result(user.email + ' DONE!')
 ```
 
 ### Step 4: Define the rest endpoint (Server)
@@ -70,7 +73,7 @@ Note: the function *response* is required to serialize back the response
 
 On the client now you can call:
 ```python
-result = DAO().add_user(user)
+result = DAO().my_remote_method(user)
 ```
 
 --------
@@ -82,3 +85,6 @@ The constructor ```def __init__(self, [ params={}, ... ] ) ``` of the serializab
 #### FAQ: 
 1. **How can I handle a remote exception?**
     Remote exception are raised on the client side with type ```remotipy.rpc.RemoteException``` and you have access to the original message (```.message```) and the original class name (```.cls```)
+1. **I get ```MethodNotFound: <my_remote_method>```**. Why?
+    Check the interface on the client side and the implementation on the server side have the same methods signatures: steps 2/3. 
+    (You could even copy same file on the client because the methods body is ignored)

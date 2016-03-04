@@ -12,6 +12,5 @@ class UserModel(object):
 
 @serializable
 class Result(object):
-    def __init__(self, params={}):
-        self.status = params.get('status')
-        self.message = params.get('message')
+    def __init__(self, msg=None):
+        self.message = msg

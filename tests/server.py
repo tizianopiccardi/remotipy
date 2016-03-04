@@ -7,9 +7,9 @@ from tests.dto import Result
 
 class DAO(object):
 
-    def add_user(self, user):
+    def my_remote_method(self, user):
         # all your logic here
-        return Result({'status': 1, 'message': user.email+' DONE!'})
+        return Result(user.email+' DONE!')
 
 ##########################################
 app = Flask(__name__)

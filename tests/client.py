@@ -6,7 +6,7 @@ from tests.dto import UserModel
 @remote("http://localhost:5000/method_dispatcher", dto)
 class RemoteDAO(object):
 
-    def add_user(self, user):
+    def my_remote_method(self, user):
         pass
 
 #########################################
@@ -17,4 +17,4 @@ if __name__ == '__main__':
                     'email': "my@email.me"
                     })
     # Call remote
-    print RemoteDAO().add_user(user).message
+    print RemoteDAO().my_remote_method(user).message
