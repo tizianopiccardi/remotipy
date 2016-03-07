@@ -130,9 +130,18 @@ def serializable(original_class):
     """
     orig_init = original_class.__init__
 
+    # This pre-init is called both in standard initialization and from the json-to-object converter
+    # (reason why we need support for empty constructor)
     def __init__(self, *args, **kws):
         setattr(original_class, "__serializable__", classmethod(lambda: True))
-        orig_init(self, *args, **kws)
+
+        try:
+            # Call the original __init__
+            orig_init(self, *args, **kws)
+        except TypeError:
+            raise TypeError("Number of arguments error. Does your class <" +
+                            original_class.__name__ +
+                            "> support empty __init__() call?")
 
     original_class.__init__ = __init__
     return original_class
