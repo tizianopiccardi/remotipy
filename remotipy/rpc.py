@@ -6,7 +6,7 @@ import sys
 http = urllib3.PoolManager(10)
 
 
-def __remote_call(endpoint, models, extras, method, *params):
+def _remote_call(endpoint, models, extras, method, *params):
     """
     Private method: execute the remote method
     :param endpoint:
@@ -29,14 +29,14 @@ def __remote_call(endpoint, models, extras, method, *params):
 
     r = http.request('POST', endpoint,
                      headers=headers,
-                     body=json.dumps(req, default=__object_serializer))
+                     body=json.dumps(req, default=_object_serializer))
     content = r.data
 
     # print("RAW RESPONSE: " + str(content))
-    return json.loads(content, object_hook=lambda x: __object_deserializer(models, x))
+    return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
 
 
-def __object_serializer(o):
+def _object_serializer(o):
     """
     Private method: Custom json serializer
     :param o:
@@ -56,7 +56,7 @@ def is_primitive(thing):
     return isinstance(thing, primitive)
 
 
-def __object_deserializer(models_module, obj):
+def _object_deserializer(models_module, obj):
     """
     Private method: Json deserializer
     :param models_module:
@@ -83,15 +83,14 @@ def __object_deserializer(models_module, obj):
         return result
 
 
-def __query_decorator(func):
+def _query_decorator(func):
     """
     Private method: Call decorator
     :param func:
     :return:
     """
     def run_query(*v):
-        logging.info(v[0].__rpc_endpoint__)
-        response_object = __remote_call(
+        response_object = _remote_call(
                                 v[0].__rpc_endpoint__,
                                 v[0].__models_module__,
                                 v[0].__rpc_extras__,
@@ -118,13 +117,9 @@ def remote(endpoint, module, **extras):
         cls.__models_module__ = module
         for attr in cls.__dict__:
             if callable(getattr(cls, attr)):
-                setattr(cls, attr, __query_decorator(getattr(cls, attr)))
+                setattr(cls, attr, _query_decorator(getattr(cls, attr)))
         return cls
     return decorate
-
-
-def __serialize_object__(obj):
-    return json.dumps(obj, default=__object_serializer)
 
 
 def serializable(original_class):
@@ -157,7 +152,7 @@ def dispatch(controller_class, models_module, params):
     params_list_dict = req['params']
     params_list = []
     for i in params_list_dict:
-        obj = __object_deserializer(models_module, i)
+        obj = _object_deserializer(models_module, i)
         params_list.append(obj)
 
     try:
@@ -182,7 +177,7 @@ def response(obj):
     :param obj:
     :return:
     """
-    return json.dumps(obj,  default=__object_serializer)
+    return json.dumps(obj,  default=_object_serializer)
 
 
 @serializable
