@@ -1,5 +1,5 @@
 # remotipy
-Remote RPC over HTTP for python (v0.1.2) - Remote exception support
+Remote RPC over HTTP for python (v0.1.2) - With remote exceptions support
 
 ### Step 1: Define the DTO (Client & Server)
 
@@ -29,7 +29,7 @@ Use the decorator *@remote* to specify the rest endpoint and the module containi
 from data import models
 
 @remote("http://localhost:5000/method_dispatcher", models)
-class RemoteDAO(object):
+class RemoteController(object):
 
     def my_remote_method(self, user):
         pass
@@ -47,7 +47,7 @@ Note: *@remote* supports custom HTTP headers using this format:
 Implement the actual logic
 
 ```python
-class DAO(object):
+class Controller(object):
 
     def my_remote_method(self, user):
         # all your logic here
@@ -63,7 +63,7 @@ You can use any python rest server to dispatch the body of the request to the in
 def query():
     # check http header, cookies, etc
     # dispatch format: controller_class, models_module, raw_body 
-    result = rpc.dispatch(DAO, models, request.get_data())
+    result = rpc.dispatch(Controller, models, request.get_data())
     return response(result)
 ```
 
@@ -73,10 +73,14 @@ Note: the function *response* is required to serialize back the response
 
 On the client now you can call:
 ```python
-result = DAO().my_remote_method(user)
+result = Controller().my_remote_method(user)
 ```
 
 --------
+
+#### More info:
+
+Just check the ```tests``` module for different test cases.
 
 #### Known limitations:
 

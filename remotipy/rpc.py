@@ -33,7 +33,11 @@ def _remote_call(endpoint, models, extras, method, *params):
     content = r.data
 
     # print("RAW RESPONSE: " + str(content))
-    return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
+    try:
+        return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
+    except ValueError as e:
+        return SerializableException({'cls': 'ValueError',
+                                     'message': 'The server response is not a restipy object: ' + content})
 
 
 def _object_serializer(o):

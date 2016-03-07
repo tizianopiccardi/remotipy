@@ -5,11 +5,20 @@ from tests import dto
 from tests.dto import Result
 
 
-class DAO(object):
+class Controller(object):
 
     def my_remote_method(self, user):
         # all your logic here
+        print 'Executing my_remote_method'
         return Result(user.email+' DONE!')
+
+    def my_remote_method_void(self, user):
+        # all your logic here
+        print 'Executing my_remote_method_void: ' + user.first_name
+        return
+
+    def my_method_with_errors(self):
+        raise TypeError("Something went wrong")
 
 ##########################################
 app = Flask(__name__)
@@ -18,7 +27,7 @@ app = Flask(__name__)
 @app.route('/method_dispatcher', methods=['POST'])
 def query():
     # check http header, cookies, etc
-    result = rpc.dispatch(DAO, dto, request.get_data())
+    result = rpc.dispatch(Controller, dto, request.get_data())
     return response(result)
 
 
