@@ -32,7 +32,6 @@ def _remote_call(endpoint, models, extras, method, *params):
                      body=json.dumps(req, default=_object_serializer))
     content = r.data
 
-    # print("RAW RESPONSE: " + str(content))
     try:
         return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
     except ValueError as e:
@@ -70,7 +69,6 @@ def _object_deserializer(models_module, obj):
     if obj is None or is_primitive(obj) or '_class' not in obj:
         return obj
     else:
-
         # if it's an exception the DTO is in this module (should be possible only on client side)
         if obj['_class'] == 'SerializableException' and obj['exception']:
             models_module = sys.modules[__name__]
@@ -81,8 +79,7 @@ def _object_deserializer(models_module, obj):
         result = cls()
         # fill the object
         for k, v in obj['_data'].iteritems():
-            if isinstance(v, object):
-                setattr(result, k, v)
+            setattr(result, k, v)
 
         return result
 
@@ -165,7 +162,8 @@ def dispatch(controller_class, models_module, params):
     params_list_dict = req['params']
     params_list = []
     for i in params_list_dict:
-        obj = _object_deserializer(models_module, i)
+        # TODO: fix this
+        obj = json.loads(json.dumps(i), object_hook=lambda x: _object_deserializer(models_module, x))
         params_list.append(obj)
 
     try:
