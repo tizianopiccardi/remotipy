@@ -29,18 +29,16 @@ def _remote_call(endpoint, models, extras, method, *params):
 
     body = json.dumps(req, default=_object_serializer)
 
-    logging.debug("RAW Request body: " + str(req))
+    logging.debug("RAW Request body: " + str(body))
 
     r = http.request('POST', endpoint,
                      headers=headers,
                      body=body)
     content = r.data
 
-
-
     try:
         return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
-    except ValueError as e:
+    except ValueError:
         return SerializableException({'cls': 'ValueError',
                                      'message': 'The server response is not a restipy object: ' + content})
 
@@ -235,4 +233,5 @@ class RemoteException(Exception):
 """
 class ParametersList(object):
     def __init__(self, params=[]):
-        self.params = params"""
+        self.params = params
+"""
