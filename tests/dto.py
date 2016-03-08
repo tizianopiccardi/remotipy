@@ -11,6 +11,19 @@ class UserModel(object):
 
 
 @serializable
+class ComplexObject(object):
+    def __init__(self):
+        self.string_field = "StringABC"
+        self.int_field = 123
+        self.list_field = ['much', 'wow', 'so', 'remotipy']
+        self.object_field = UserModel({
+                    'first_name': "Doge",
+                    'last_name': "McDog",
+                    'email': "doge@mcdog.me"
+                    })
+
+
+@serializable
 class Result(object):
     def __init__(self, msg=None):
         self.message = msg

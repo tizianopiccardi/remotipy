@@ -1,8 +1,12 @@
+import logging
+
 from flask import Flask, request
 from remotipy import rpc
 from remotipy.rpc import response
 from tests import dto
 from tests.dto import Result
+
+# logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
 class Controller(object):
@@ -18,7 +22,13 @@ class Controller(object):
         return
 
     def my_method_with_errors(self):
-        raise TypeError("Something went wrong")
+        raise TypeError("Something went wrong as expected")
+
+    def my_method_with_complex_params(self, complex, extra_param1):
+        if extra_param1 == 1:
+            return complex.object_field.first_name
+        else:
+            return 'Some error message'
 
 ##########################################
 app = Flask(__name__)

@@ -27,10 +27,16 @@ def _remote_call(endpoint, models, extras, method, *params):
     if 'headers' in extras:
         headers = extras['headers']
 
+    body = json.dumps(req, default=_object_serializer)
+
+    logging.debug("RAW Request body: " + str(req))
+
     r = http.request('POST', endpoint,
                      headers=headers,
-                     body=json.dumps(req, default=_object_serializer))
+                     body=body)
     content = r.data
+
+
 
     try:
         return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
@@ -166,6 +172,10 @@ def dispatch(controller_class, models_module, params):
         obj = json.loads(json.dumps(i), object_hook=lambda x: _object_deserializer(models_module, x))
         params_list.append(obj)
 
+    logging.debug('Calling ' + controller_class.__name__ +
+                  '.' + str(controller_method) + '(' +
+                  str(params_list) + ')')
+
     try:
 
         if not hasattr(controller, controller_method):
@@ -175,6 +185,7 @@ def dispatch(controller_class, models_module, params):
         return method_reference(*params_list)
 
     except Exception as e:
+        logging.exception(e)
         logging.error('Exception ' + e.__class__.__name__ +
                       ' managed in method ' + controller_method +
                       ": " + e.message)
@@ -220,3 +231,8 @@ class RemoteException(Exception):
 
     def __str__(self):
         return self.cls + ": " + self.message
+
+"""
+class ParametersList(object):
+    def __init__(self, params=[]):
+        self.params = params"""
