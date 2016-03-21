@@ -3,7 +3,7 @@ import logging
 import urllib3
 import sys
 
-http = urllib3.PoolManager(10)
+http = urllib3.PoolManager(10, None, maxsize=15)
 
 
 def _remote_call(endpoint, models, extras, method, *params):
@@ -229,9 +229,3 @@ class RemoteException(Exception):
 
     def __str__(self):
         return self.cls + ": " + self.message
-
-"""
-class ParametersList(object):
-    def __init__(self, params=[]):
-        self.params = params
-"""
