@@ -25,6 +25,9 @@ class RemoteController(object):
     def my_method_with_complex_params(self, complex, extra_param1):
         pass
 
+    def my_method_get_dict(self):
+        pass
+
 #########################################
 if __name__ == '__main__':
     user = UserModel({
@@ -59,3 +62,7 @@ if __name__ == '__main__':
     # Call remote empty result
     complex_obj = ComplexObject()
     print RemoteController().my_method_with_complex_params(complex_obj, 1)
+
+    # Test 6
+    # Get a dictionary
+    print RemoteController().my_method_get_dict()

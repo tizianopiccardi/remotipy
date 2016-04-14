@@ -30,6 +30,9 @@ class Controller(object):
         else:
             return 'Some error message'
 
+    def my_method_get_dict(self):
+        return {'value1': 1, 'value2': 2}
+
 ##########################################
 app = Flask(__name__)
 
