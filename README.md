@@ -1,6 +1,11 @@
 # remotipy
 Remote RPC over HTTP for python (v0.1.2) - With remote exceptions support
 
+Setup:
+```
+pip install remotipy
+```
+
 ### Step 1: Define the DTO (Client & Server)
 
 In module *data.dto* (example) describe the transfer objects (DTO):

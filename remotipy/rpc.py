@@ -1,9 +1,14 @@
 import json
 import logging
+import types
+from functools import wraps
+
 import urllib3
 import sys
 
-http = urllib3.PoolManager(10, None, maxsize=15)
+
+class Remotipy(object):
+    http = urllib3.PoolManager(10, None, maxsize=15)
 
 
 def _remote_call(endpoint, models, extras, method, *params):
@@ -18,9 +23,10 @@ def _remote_call(endpoint, models, extras, method, *params):
     """
     method_params = []
 
-    for i in range(1, len(params)):
+    for i in range(0, len(params)):
         method_params.append(params[i])
     req = {'method': method, 'params': method_params}
+
     logging.debug("REQUEST GET: " + endpoint)
     logging.debug("BODY: " + str(req))
     headers = {}
@@ -31,16 +37,16 @@ def _remote_call(endpoint, models, extras, method, *params):
 
     logging.debug("RAW Request body: " + str(body))
 
-    r = http.request('POST', endpoint,
-                     headers=headers,
-                     body=body)
+    r = Remotipy.http.request('POST', endpoint,
+                                     headers=headers,
+                                     body=body)
     content = r.data
 
     try:
         return json.loads(content, object_hook=lambda x: _object_deserializer(models, x))
     except ValueError:
         return SerializableException({'cls': 'ValueError',
-                                     'message': 'The server response is not a restipy object: ' + content})
+                                      'message': 'The server response is not a restipy object: ' + content})
 
 
 def _object_serializer(o):
@@ -54,6 +60,7 @@ def _object_serializer(o):
         if isinstance(o, SerializableException):
             result['exception'] = True
         return result
+
 
 # types that do not need complex in json (and not iterable)
 primitive = (int, str, bool, float)
@@ -88,23 +95,33 @@ def _object_deserializer(models_module, obj):
         return result
 
 
-def _query_decorator(func):
+def _query_decorator(func, rpc_endpoint, models_module, rpc_extras):
     """
     Private method: Call decorator
     :param func:
     :return:
     """
+
+    is_static = isinstance(func, types.FunctionType)
+
+    @wraps(func)
     def run_query(*v):
+
+        # if not static remove the instance reference (this will not be serialized)
+        if not is_static:
+            v = tuple(list(v)[1:])
+
         response_object = _remote_call(
-                                v[0].__rpc_endpoint__,
-                                v[0].__models_module__,
-                                v[0].__rpc_extras__,
-                                func.__name__, *v)
-        #return func(*v)
+            rpc_endpoint,
+            models_module,
+            rpc_extras,
+            func.__name__, *v)
+        # return func(*v)
         if isinstance(response_object, SerializableException):
             raise RemoteException(response_object.message, response_object.cls)
         else:
             return response_object
+
     return run_query
 
 
@@ -116,14 +133,22 @@ def remote(endpoint, module, **extras):
     :param extras:
     :return:
     """
+
     def decorate(cls):
         cls.__rpc_endpoint__ = endpoint
         cls.__rpc_extras__ = extras
         cls.__models_module__ = module
         for attr in cls.__dict__:
             if callable(getattr(cls, attr)):
-                setattr(cls, attr, _query_decorator(getattr(cls, attr)))
+                # keep the static / class method definition
+                if isinstance(getattr(cls, attr), types.FunctionType):
+                    method = staticmethod(_query_decorator(getattr(cls, attr), endpoint, module, extras))
+                else:
+                    method = _query_decorator(getattr(cls, attr), endpoint, module, extras)
+
+                setattr(cls, attr, method)
         return cls
+
     return decorate
 
 
@@ -160,8 +185,10 @@ def dispatch(controller_class, models_module, params):
     :param params:
     :return:
     """
+
+    print params
     req = json.loads(params)
-    controller = controller_class()
+
     controller_method = req['method']
     params_list_dict = req['params']
     params_list = []
@@ -176,10 +203,16 @@ def dispatch(controller_class, models_module, params):
 
     try:
 
-        if not hasattr(controller, controller_method):
+        if not hasattr(controller_class, controller_method):
             raise MethodNotFound(controller_method)
 
-        method_reference = getattr(controller, controller_method)
+        # is it static?
+        if isinstance(getattr(controller_class, controller_method), types.FunctionType):
+            method_reference = getattr(controller_class, controller_method)
+            print params_list
+        else:
+            controller = controller_class()
+            method_reference = getattr(controller, controller_method)
         return method_reference(*params_list)
 
     except Exception as e:
@@ -197,7 +230,7 @@ def response(obj):
     :param obj:
     :return:
     """
-    return json.dumps(obj,  default=_object_serializer)
+    return json.dumps(obj, default=_object_serializer)
 
 
 @serializable
@@ -205,6 +238,7 @@ class SerializableException(object):
     """
     Exception DTO
     """
+
     def __init__(self, info={}):
         self.cls = info.get('cls')
         self.message = info.get('message')
@@ -221,8 +255,8 @@ class RemoteException(Exception):
     """
     Raised on the client side if we had an exception on the server
     """
-    def __init__(self, message, cls):
 
+    def __init__(self, message, cls):
         # Call the base class constructor with the parameters it needs
         super(RemoteException, self).__init__(message)
         self.cls = cls

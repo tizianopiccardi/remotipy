@@ -28,6 +28,13 @@ class RemoteController(object):
     def my_method_get_dict(self):
         pass
 
+    @staticmethod
+    def my_static_method(name):
+        pass
+
+    @staticmethod
+    def my_static_empty_method():
+        pass
 #########################################
 if __name__ == '__main__':
     user = UserModel({
@@ -66,3 +73,11 @@ if __name__ == '__main__':
     # Test 6
     # Get a dictionary
     print RemoteController().my_method_get_dict()
+
+    # Test 6
+    # Static Method
+    print RemoteController.my_static_method("Static!")
+
+    # Test 7
+    # Static Empty Method
+    print RemoteController.my_static_empty_method()

@@ -33,6 +33,14 @@ class Controller(object):
     def my_method_get_dict(self):
         return {'value1': 1, 'value2': 2}
 
+    @staticmethod
+    def my_static_method(name):
+        return 'Hello '+name
+
+    @staticmethod
+    def my_static_empty_method():
+        return "Everything OK!"
+
 ##########################################
 app = Flask(__name__)
 
