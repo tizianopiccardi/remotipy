@@ -38,8 +38,8 @@ def _remote_call(endpoint, models, extras, method, *params):
     logging.debug("RAW Request body: " + str(body))
 
     r = Remotipy.http.request('POST', endpoint,
-                                     headers=headers,
-                                     body=body)
+                              headers=headers,
+                              body=body)
     content = r.data
 
     try:
@@ -60,6 +60,8 @@ def _object_serializer(o):
         if isinstance(o, SerializableException):
             result['exception'] = True
         return result
+    else:
+        return str(o)
 
 
 # types that do not need complex in json (and not iterable)

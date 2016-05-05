@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
     name='remotipy',
     packages=['remotipy'],  # this must be the same as the name above
-    version='0.1',
+    version='0.1.2',
     description='Remote RPC over HTTP for python',
     author='Tiziano Piccardi',
     author_email='t.piccardi@unitn.it',
